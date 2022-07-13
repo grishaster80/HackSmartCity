@@ -8,7 +8,9 @@ import androidx.compose.material.Scaffold
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -25,7 +27,7 @@ fun HackMainScreen() {
         modifier = Modifier.fillMaxHeight(),
         bottomBar = {
             if (appState.shouldShowBottomBar) {
-                BottomNavigation() {
+                BottomNavigation(backgroundColor = Color.White, elevation = 0.dp) {
                     val currentRoute = navController.currentDestination?.route
                     val items = listOf<BottomNavItem>(
                         BottomNavItem.FEED,
@@ -35,8 +37,14 @@ fun HackMainScreen() {
 
                     items.forEach { item ->
                         BottomNavigationItem(selected = currentRoute == item.route, onClick = {
-                            navController.navigate(item.route)
-                        }, icon = { Icon(imageVector = item.icon, null) })
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        }, icon = { Icon(imageVector = item.icon, null, tint = Color.Black) })
                     }
                 }
             }
