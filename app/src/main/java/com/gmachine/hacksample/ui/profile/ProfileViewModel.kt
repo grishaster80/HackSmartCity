@@ -16,6 +16,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.*
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
+import java.lang.Thread.sleep
 import javax.inject.Inject
 
 @HiltViewModel
@@ -68,6 +69,7 @@ class ProfileViewModel @Inject constructor(private val storage: Storage, private
                     Log.e("@@@","signInResponse is ${signInResponse}")
                     storage.setAuthToken(signInResponse.access_token)
                     userSignInResponse.postValue(true)
+                    sleep(2000)
                     fetchUserInfo()
                 }
 

@@ -52,7 +52,7 @@ fun NavigationGraph(navController: NavHostController, navigationViewModel: Navig
 }
 
 fun listOfStories(): List<Story>{
-    return listOf(Story("Как работает приложение", R.drawable.story_preview),Story("Проголосуйте за талисман", R.drawable.story_preview1), Story("Доступные гранты", R.drawable.story_preview), Story("Как работает приложение", R.drawable.story_preview1))
+    return listOf(Story("Как работает приложение!", R.drawable.story_preview),Story("Проголосуйте за талисман!", R.drawable.story_preview1))
 }
 
 fun listOfMatchResult(): List<com.gmachine.hacksample.ui.feed.MatchResult> {

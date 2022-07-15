@@ -38,7 +38,8 @@ fun OnboardingScreen(
                 painterResource(id = com.gmachine.hacksample.R.drawable.ill),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(280.dp),
+                    .height(280.dp)
+                    .fillMaxWidth(),
                 contentScale = ContentScale.Crop
             )
             Spacer(modifier = Modifier.height(120.dp))
