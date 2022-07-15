@@ -12,9 +12,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -28,8 +31,6 @@ import com.gmachine.hacksample.ui.feed.*
 import com.gmachine.hacksample.ui.theme.ColorLiveRed
 import com.gmachine.hacksample.ui.theme.ColorShapeGray
 import com.gmachine.hacksample.ui.theme.FeedLiveItemTextStyle
-import com.google.accompanist.swiperefresh.SwipeRefresh
-import com.google.accompanist.swiperefresh.rememberSwipeRefreshState
 
 
 @Composable
@@ -38,7 +39,22 @@ fun FeedScreen(
     feedModel: FeedModel,
     navHostController: NavHostController
 ) {
-    SwipeRefresh(state = rememberSwipeRefreshState(isRefreshing = false), onRefresh = { }) {
+    val myFeedModel by viewModel.feedModel.observeAsState()
+    MyInfo(viewModel, myFeedModel, navHostController)
+}
+
+@Composable
+fun MyInfo(
+    viewModel: FeedViewModel,
+    feedModel: FeedModel?,
+    navHostController: NavHostController
+) {
+    val myModel = feedModel ?: FeedModel(listOfStories(), listOfMatchResult(), listOfNewsInfo())
+    if (feedModel == null) {
+        Box(modifier = Modifier.fillMaxSize()) {
+            CircularProgressIndicator(modifier = Modifier.align(Alignment.Center))
+        }
+    } else {
         LazyColumn(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier
@@ -49,7 +65,7 @@ fun FeedScreen(
                 ScreenTitle(title = "Лента")
             }
             item {
-                StoryItems(storiesList = feedModel.stroriesList, navHostController)
+                StoryItems(storiesList = myModel.stroriesList, navHostController)
             }
             item {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -57,7 +73,7 @@ fun FeedScreen(
             }
             item {
                 Spacer(modifier = Modifier.height(12.dp))
-                MatchResultItems(matchResultList = feedModel.matchResultList)
+                MatchResultItems(matchResultList = myModel.matchResultList)
             }
             item {
                 Spacer(modifier = Modifier.height(24.dp))
@@ -65,7 +81,7 @@ fun FeedScreen(
             }
             item {
                 Spacer(modifier = Modifier.height(12.dp))
-                feedModel.newsInfoList.forEach {
+                myModel.newsInfoList.forEach {
                     if (it.newsType == NewsType.DEFAULT_NEWS) {
                         NewsInfoItem(newsInfo = it)
                     } else {
@@ -77,6 +93,7 @@ fun FeedScreen(
 
         }
     }
+
 }
 
 @Composable

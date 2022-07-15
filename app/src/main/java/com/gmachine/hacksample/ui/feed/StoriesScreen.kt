@@ -14,7 +14,7 @@ import com.ui.simplestories.Stories
 @Composable
 fun StoriesScreen(navHostController: NavHostController) {
     Box(modifier = Modifier.fillMaxSize()) {
-        val listOfImages = listOf<Int>(R.drawable.sunset, R.drawable.sunset)
+        val listOfImages = listOf<Int>(R.drawable.story_1, R.drawable.story_2)
         Stories(numberOfPages = listOfImages.size, slideDurationInSeconds = 2L, touchToPause = false, onComplete = {navHostController.navigateUp()}) {
             Image(painter = painterResource(id = listOfImages[it]), contentDescription = null,
                 contentScale = ContentScale.Crop, modifier = Modifier.fillMaxSize())

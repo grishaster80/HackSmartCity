@@ -2,7 +2,7 @@ package com.gmachine.hacksample.di
 
 import android.content.Context
 import coil.ImageLoader
-import com.gmachine.hacksample.network.CompetitionsService
+import com.gmachine.hacksample.network.MainService
 import com.gmachine.hacksample.utils.network.BaseInterceptor
 import dagger.Module
 import dagger.Provides
@@ -38,7 +38,7 @@ object NetworkModule {
         return Retrofit.Builder()
             .client(okHttpClient)
             .baseUrl(
-                "http://35.173.193.253:8081"
+                "http://35.173.193.253"
             )
             .addConverterFactory(GsonConverterFactory.create())
             .build()
@@ -48,8 +48,8 @@ object NetworkModule {
     @Singleton
     fun provideCompetitionsService(
         retrofit: Retrofit
-    ): CompetitionsService {
-        return retrofit.create(CompetitionsService::class.java)
+    ): MainService {
+        return retrofit.create(MainService::class.java)
     }
 
 }

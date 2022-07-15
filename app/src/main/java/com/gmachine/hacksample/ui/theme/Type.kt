@@ -151,3 +151,17 @@ val FeedLiveItemTextStyle = TextStyle(
     fontSize = 12.sp,
     color = Color.White
 )
+
+val ScreenDescriptionTextStyle = TextStyle(
+    fontFamily = Manrope,
+    fontWeight = FontWeight.Normal,
+    fontSize = 16.sp,
+    color = ColorTextScreenDescription
+)
+
+val TextFieldTextStyle = TextStyle(
+    fontFamily = Manrope,
+    fontWeight = FontWeight.Normal,
+    fontSize = 16.sp,
+    color = ColorTextField
+)

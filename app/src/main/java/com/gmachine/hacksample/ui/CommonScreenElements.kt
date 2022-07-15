@@ -13,12 +13,12 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import com.gmachine.hacksample.R
-import com.gmachine.hacksample.ui.theme.*
+import com.gmachine.hacksample.ui.theme.ScreenDescriptionTextStyle
 
 @Composable
 fun ScreenTitle(title: String) {
     Spacer(Modifier.height(40.dp))
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
             style = MaterialTheme.typography.h3,
@@ -29,7 +29,7 @@ fun ScreenTitle(title: String) {
 
 @Composable
 fun ScreenSubTitle(title: String) {
-    Box(modifier = Modifier.fillMaxSize()) {
+    Box(modifier = Modifier.fillMaxWidth()) {
         Text(
             text = title,
             style = MaterialTheme.typography.h5,
@@ -39,16 +39,59 @@ fun ScreenSubTitle(title: String) {
 }
 
 @Composable
-fun DefaultWideButton(title: String, isButtonActive: Boolean, buttonActiveColor: Color, buttonNotActiveColor: Color, buttonTextStyle: TextStyle, onButtonClick: () -> Unit) {
-    Button(
-        onClick = onButtonClick,
+fun ScreenDescription(description: String) {
+    Box(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                color = if (isButtonActive) buttonActiveColor else buttonNotActiveColor,
-                shape = RoundedCornerShape(16.dp)
-            ),
+            .padding(end = 8.dp)
+    ) {
+        Text(
+            text = description,
+            style = ScreenDescriptionTextStyle,
+            modifier = Modifier.align(Alignment.CenterStart)
+        )
+    }
+}
+
+@Composable
+fun TextFieldHint(hint: String) {
+    Text(text = hint, style = ScreenDescriptionTextStyle)
+}
+
+@Composable
+fun DefaultWideButton(
+    title: String,
+    buttonActiveColor: Color,
+    buttonTextStyle: TextStyle,
+    onButtonClick: () -> Unit
+) {
+    Button(
+        onClick = onButtonClick,
+        colors = ButtonDefaults.buttonColors(backgroundColor = buttonActiveColor, contentColor = buttonActiveColor),
+        enabled = true,
+        modifier = Modifier
+            .fillMaxWidth(),
         shape = RoundedCornerShape(12.dp)
+    ) {
+        Text(text = title, style = buttonTextStyle, modifier = Modifier.padding(10.dp).background(buttonActiveColor).align(Alignment.CenterVertically))
+    }
+}
+
+@Composable
+fun DefaultWideButton1(
+    title: String,
+    isButtonActive: Boolean,
+    buttonActiveColor: Color,
+    buttonNotActiveColor: Color,
+    buttonTextStyle: TextStyle,
+    onButtonClick: () -> Unit
+) {
+    Button(
+        onClick = onButtonClick,
+        colors = ButtonDefaults.buttonColors(backgroundColor = if (isButtonActive) buttonActiveColor else buttonNotActiveColor),
+        modifier = Modifier
+            .fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
     ) {
         Text(text = title, style = buttonTextStyle, modifier = Modifier.padding(12.dp))
     }

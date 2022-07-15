@@ -1,6 +1,8 @@
 package com.gmachine.hacksample.ui
 
+import android.content.Context
 import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -8,16 +10,27 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.MaterialTheme
-import androidx.compose.material.Text
-import androidx.compose.runtime.Composable
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.runtime.*
+import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import coil.compose.AsyncImage
+import com.gmachine.hacksample.data.SignInInfo
 import com.gmachine.hacksample.ui.profile.ProfileModel
 import com.gmachine.hacksample.ui.profile.ProfileViewModel
 import com.gmachine.hacksample.ui.theme.*
@@ -25,8 +38,150 @@ import com.gmachine.hacksample.ui.theme.*
 @Composable
 fun ProfileScreen(
     viewModel: ProfileViewModel,
-    profileModel: ProfileModel
+    profileModel: ProfileModel,
+    navHostController: NavHostController
 ) {
+    val myProfileModel by viewModel.profileModel.observeAsState()
+    if (viewModel.isUserAuthorized()) {
+        ProfileScreenAuthorized(viewModel = viewModel, profileModel = myProfileModel)
+    } else {
+        ProfileScreenSignIn(viewModel, navHostController)
+    }
+    val signInResponse by viewModel.userSignInResponse.observeAsState()
+    ProfileRouting(
+        viewModel = viewModel,
+        profileModel = myProfileModel,
+        navHostController = navHostController,
+        isUserAuthorized = viewModel.isUserAuthorized(),
+        signInResponse = signInResponse
+    )
+}
+
+@Composable
+fun ProfileRouting(viewModel: ProfileViewModel,
+                   profileModel: ProfileModel?,
+                   navHostController: NavHostController,
+                    isUserAuthorized: Boolean,
+                    signInResponse: Boolean?) {
+    if(signInResponse == true) {
+        ProfileScreenAuthorized(viewModel = viewModel, profileModel = profileModel)
+    } else if(isUserAuthorized) {
+        ProfileScreenAuthorized(viewModel = viewModel, profileModel = profileModel)
+    } else {
+        ProfileScreenSignIn(viewModel, navHostController)
+    }
+}
+
+@Composable
+fun ProfileScreenSignIn(viewModel: ProfileViewModel, navHostController: NavHostController) {
+    var login by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+    var passwordVisibility by remember { mutableStateOf(false) }
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 16.dp, end = 16.dp, bottom = 20.dp)
+    ) {
+        Column(modifier = Modifier
+            .fillMaxSize()
+            .align(Alignment.TopStart)) {
+            Spacer(Modifier.height(40.dp))
+            Surface(modifier = Modifier.fillMaxWidth()) {
+                ScreenTitle(title = "Войдите в аккаунт")
+            }
+            Surface(modifier = Modifier.fillMaxWidth()) {
+                ScreenDescription(description = "Войдите или зарегистрируйтесь, чтобы участвовать в соревнованиях")
+            }
+            Spacer(modifier = Modifier.height(60.dp))
+            TextField(
+                value = login,
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(12.dp),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = ColorTextField,
+                    disabledTextColor = Color.Transparent,
+                    backgroundColor = ColorShapeGray,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                onValueChange = {
+                    login = it
+                    Log.e("@@@", "Login is $it")
+                },
+                textStyle = TextFieldTextStyle,
+                placeholder = { TextFieldHint("Введите логин") })
+            Spacer(modifier = Modifier.height(12.dp))
+            TextField(
+                value = password,
+                modifier = Modifier.fillMaxWidth(),
+                onValueChange = {
+                    password = it
+                    Log.e("@@@", "Pass is $it")
+                },
+                shape = RoundedCornerShape(12.dp),
+                colors = TextFieldDefaults.textFieldColors(
+                    textColor = ColorTextField,
+                    disabledTextColor = Color.Transparent,
+                    backgroundColor = ColorShapeGray,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                textStyle = TextFieldTextStyle,
+                placeholder = { TextFieldHint("Введите пароль") },
+                visualTransformation = if (passwordVisibility) VisualTransformation.None else PasswordVisualTransformation(),
+                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                trailingIcon = {
+                    val image = if (passwordVisibility)
+                        Icons.Filled.Visibility
+                    else Icons.Filled.VisibilityOff
+
+                    val description = if (passwordVisibility) "Hide password" else "Show password"
+                    IconButton(onClick = { passwordVisibility = !passwordVisibility }) {
+                        Icon(imageVector = image, description)
+                    }
+                }
+            )
+            Spacer(modifier = Modifier.height(24.dp))
+            Surface(modifier = Modifier.fillMaxWidth()) {
+                DefaultWideButton(
+                    title = "Войти",
+                    buttonActiveColor = Purple500,
+                    buttonTextStyle = ButtonTextStyleWhite
+                ) {
+                    viewModel.signIn(getSignInInfo(login, password))
+                    Log.e("@@@", "Clicked")
+                }
+            }
+        }
+        Surface(
+            modifier = Modifier
+                .align(Alignment.BottomCenter)
+                .fillMaxWidth()
+        ) {
+            DefaultWideButton(
+                title = "Создать аккаунт",
+                buttonActiveColor = ColorShapeRegisterButton,
+                buttonTextStyle = MaterialTheme.typography.h5
+            ) {
+                navHostController.navigate("create_account")
+                Log.e("@@@", "Clicked")
+            }
+        }
+    }
+}
+
+private fun getSignInInfo(login: String, password: String): SignInInfo {
+    return SignInInfo(username = login, password = password)
+}
+
+@Composable
+fun ProfileScreenAuthorized(
+    viewModel: ProfileViewModel,
+    profileModel: ProfileModel?
+) {
+    val myModel = profileModel ?: ProfileModel(fullName = "", login = "")
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -44,24 +199,31 @@ fun ProfileScreen(
             contentScale = ContentScale.Crop
         )
         Spacer(modifier = Modifier.height(16.dp))
-        Text(text = profileModel.fullName, style = ProfileNameTextStyle)
+        Text(text = myModel.fullName, style = ProfileNameTextStyle)
         Spacer(modifier = Modifier.height(8.dp))
-        Text(text = profileModel.login, style = ProfileLoginTextStyle)
+        Text(text = myModel.login, style = ProfileLoginTextStyle)
         Spacer(modifier = Modifier.height(32.dp))
-        Row(horizontalArrangement = Arrangement.spacedBy(4.dp), modifier = Modifier.fillMaxWidth()) {
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
-                ProfileCountElement(profileModel.userTeams.size, "Команд")
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                ProfileCountElement(myModel.userTeams.size, "Команд")
             }
-            Box(modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f)) {
-                ProfileCountElement(profileModel.matches, "Матчей")
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f)
+            ) {
+                ProfileCountElement(myModel.matches, "Матчей")
             }
         }
         Spacer(modifier = Modifier.height(12.dp))
-        ProfileVictoriesCountElement(profileModel.wins)
+        ProfileVictoriesCountElement(myModel.wins)
         Spacer(modifier = Modifier.height(32.dp))
         Row(horizontalArrangement = Arrangement.SpaceBetween, modifier = Modifier.fillMaxWidth()) {
             Text(text = "Любимые виды спорта", style = MaterialTheme.typography.h5)
@@ -77,7 +239,7 @@ fun ProfileScreen(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            itemsIndexed(profileModel.favoriteSports) { index, result ->
+            itemsIndexed(myModel.favoriteSports) { index, result ->
                 FavoriteSportElement(result)
             }
         }

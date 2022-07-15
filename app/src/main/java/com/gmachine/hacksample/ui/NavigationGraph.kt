@@ -12,12 +12,14 @@ import com.gmachine.hacksample.data.Team
 import com.gmachine.hacksample.ui.feed.*
 import com.gmachine.hacksample.ui.onboarding.OnboardingModel
 import com.gmachine.hacksample.ui.onboarding.OnboardingScreen
+import com.gmachine.hacksample.ui.profile.CreateAccountScreen
 import com.gmachine.hacksample.ui.profile.ProfileModel
 import com.gmachine.hacksample.utils.BottomNavItem
 
 @Composable
-fun NavigationGraph(navController: NavHostController) {
-    NavHost(navController, startDestination = "onboarding?screenNumber={screenNumber}") {
+fun NavigationGraph(navController: NavHostController, navigationViewModel: NavigationViewModel) {
+    val startDestination = if (navigationViewModel.isNeedToShowOnboarding()) ONBOARDING_ROUTE_0 else BottomNavItem.FEED.route
+    NavHost(navController, startDestination = startDestination) {
         composable(BottomNavItem.FEED.route) {
             FeedScreen(hiltViewModel(), FeedModel(listOfStories(), listOfMatchResult(), listOfNewsInfo()), navController)
         }
@@ -25,12 +27,13 @@ fun NavigationGraph(navController: NavHostController) {
             EventsScreen(hiltViewModel())
         }
         composable(BottomNavItem.PROFILE.route) {
-            ProfileScreen(hiltViewModel(), profileModel())
+            ProfileScreen(hiltViewModel(), profileModel(), navController)
         }
         composable(route = "onboarding?screenNumber={screenNumber}", arguments = listOf(navArgument("screenNumber"){
             type = NavType.IntType
             defaultValue = 0
         })) {
+            navigationViewModel.onBoardingShown()
             OnboardingScreen(onboardingModel(), navController, it.arguments?.getInt("screenNumber"))
         }
 
@@ -41,18 +44,22 @@ fun NavigationGraph(navController: NavHostController) {
             StoriesScreen(navController)
         }
 
+        composable("create_account") {
+            CreateAccountScreen(hiltViewModel())
+        }
+
     }
 }
 
-private fun listOfStories(): List<Story>{
-    return listOf(Story("Событие или новость", R.drawable.sand),Story("Событие или новость", R.drawable.sand), Story("Событие или новость", R.drawable.sand), Story("Событие или новость", R.drawable.sand))
+fun listOfStories(): List<Story>{
+    return listOf(Story("Как работает приложение", R.drawable.story_preview),Story("Проголосуйте за талисман", R.drawable.story_preview1), Story("Доступные гранты", R.drawable.story_preview), Story("Как работает приложение", R.drawable.story_preview1))
 }
 
-private fun listOfMatchResult(): List<com.gmachine.hacksample.ui.feed.MatchResult> {
+fun listOfMatchResult(): List<com.gmachine.hacksample.ui.feed.MatchResult> {
     return listOf(MatchResult("Баскет", "Результаты", TeamResultInfo(R.drawable.sunset, "Милан", 10),TeamResultInfo(R.drawable.sand, "Интер", 4)),MatchResult("Баскет", "Результаты", TeamResultInfo(R.drawable.sunset, "Милан", 10),TeamResultInfo(R.drawable.sand, "Интер", 4)))
 }
 
-private fun listOfNewsInfo(): List<NewsInfo> {
+fun listOfNewsInfo(): List<NewsInfo> {
     return listOf(NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.LIVE_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS),NewsInfo("Заголовок с текстом события или новости", "Настольный теннис", "Дата/Время", "", NewsType.DEFAULT_NEWS))
 }
 
@@ -69,3 +76,5 @@ private fun profileModel(): ProfileModel{
 }
 
 val ROUTES = listOf<String>("feed", "events", "profile")
+
+val ONBOARDING_ROUTE_0 = "onboarding?screenNumber={screenNumber}"
